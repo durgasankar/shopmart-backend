@@ -1,0 +1,22 @@
+{
+  "name": "shopmart-backend",
+  "version": "1.0.0",
+  "description": "This is a shopping cart backend application",
+  "license": "ISC",
+  "author": "Durgasankar Mishra",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon server.js",
+    "start": "node server.js"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  },
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "sequelize": "^6.37.8"
+  }
+}
