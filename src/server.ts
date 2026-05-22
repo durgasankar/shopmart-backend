@@ -1,11 +1,10 @@
 import dotenv from 'dotenv';
 import express from 'express';
-import { Router } from 'express';
-import app from './src/app.js';
+import app from './app';
 
 const PORT = process.env.PORT || 5000;
 
-const startServer = async () => {
+const startServer = async (): Promise<void> => {
     try {
         app.listen(PORT, () => {
             console.log(`Server started on port ${PORT}`);
