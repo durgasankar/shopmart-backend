@@ -1,12 +1,12 @@
 import dotenv from 'dotenv';
-import express from 'express';
 import app from './app';
 import connectMongoDB from './configs/mongo-db';
 import { connectPostgresDB } from './configs/postgres-db';
+import { logger } from './configs/winston-logger';
 
 // loading env configs
 dotenv.config();
-const PORT = process.env.PORT || 5000;
+const PORT: number = Number(process.env.PORT) || 5000;
 
 const startServer = async (): Promise<void> => {
     try {
@@ -14,10 +14,10 @@ const startServer = async (): Promise<void> => {
         await connectMongoDB();
         await connectPostgresDB();
         app.listen(PORT, () => {
-            console.log(`Server started on port ${PORT}`);
+            logger.info(`Server started on port ${PORT}`)
         });
-    } catch (error) {
-        console.error('Failed to start the server.');
+    } catch (error: any) {
+        logger.error('Failed to start the server.', { message: error.message, stack: error.stack });
         process.exit(1); // stopping alll processes
     }
 }

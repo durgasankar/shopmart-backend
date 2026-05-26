@@ -4,7 +4,10 @@ import winston from "winston";
 const { combine, timestamp, printf, colorize, errors } = winston.format;
 
 // Custom log format
-const logFormat = printf(({ level, message, timestamp, stack }) => {
+const logFormat = printf(({ level, message, timestamp, stack }): string => {
+    if (typeof message === "object") {
+        message = JSON.stringify(message, null, 2)
+    }
     return `${timestamp} [${level}]: ${stack || message}`;
 });
 

@@ -14,5 +14,16 @@ export const requestLogger = (req: Request, res: Response, next: NextFunction) =
             ip: req.ip,
         });
     });
+
+    res.on("close", () => {
+        if (!res.writableEnded) {
+            logger.warn({
+                method: req.method,
+                url: req.originalUrl,
+                message: "Request closed before response finished",
+            });
+        }
+    });
+
     next();
 }
