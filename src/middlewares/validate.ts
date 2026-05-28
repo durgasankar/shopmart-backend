@@ -1,26 +1,23 @@
 import { NextFunction, Request, Response } from "express";
+import { ResponseHandler } from "../utils/response-handler";
 
-export const validateRegister = (
-    req: Request,
-    res: Response,
-    next: NextFunction
-): void => {
+export const validateRegisterRequest = (req: Request, res: Response, next: NextFunction) => {
     const { firstName, email, mobileNumber, password } = req.body;
-    if (!firstName) {
-        res.status(400).json({ message: "firstName is required" });
-        return;
-    }
-    if (!email) {
-        res.status(400).json({ message: "email is required" });
-        return;
-    }
-    if (!mobileNumber) {
-        res.status(400).json({ message: "mobileNumber is required" });
-        return;
-    }
-    if (!password) {
-        res.status(400).json({ message: "password is required" });
-        return;
+    if (!firstName || !email || !mobileNumber || !password) {
+        return ResponseHandler.error(res, 'All fields are mandatory');
     }
     next();
 };
+
+export const validateLoginRequest = (req: Request, res: Response, next: NextFunction) => {
+    const { email, password } = req.body;
+    if (!email || !password) {
+        return ResponseHandler.error(res, 'All fields are mandatory');
+    }
+    if (!isValidEmailAddress(email)) {
+        return ResponseHandler.error(res, 'Invalid Email format.');
+    }
+    next();
+}
+
+const isValidEmailAddress = (email: string): boolean => /^\S+@\S+\.\S+$/.test(email);
