@@ -4,6 +4,7 @@ import { logger } from "../configs/winston-logger";
 import { BaseController } from "./base-controller";
 import { RegistrationUserResponse } from "../dtos/registration-user";
 import { LoginUserResponse } from "../dtos/login-user";
+import { getRegisterUserFormattedBody } from "../utils/request-formatter";
 
 export class UserController extends BaseController {
     private userService: UserServices;
@@ -14,7 +15,7 @@ export class UserController extends BaseController {
     }
     public registerUserController = async (req: Request, res: Response) => {
         try {
-            const newUser = req.body;
+            const newUser = getRegisterUserFormattedBody(req.body);
             const createdUser: RegistrationUserResponse = await this.userService.registerNewUser(newUser);
             return this.created(res, 'Registration successful.', createdUser)
         } catch (error: any) {

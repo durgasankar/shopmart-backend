@@ -20,4 +20,18 @@ export const validateLoginRequest = (req: Request, res: Response, next: NextFunc
     next();
 }
 
+export const validateAddProductRequest = (req: Request, res: Response, next: NextFunction) => {
+    const { name, category, price, quantity } = req.body;
+    if (!name || !category || !price || !category) {
+        return ResponseHandler.error(res, 'All fields are mandatory.');
+    }
+    if (isNaN(price) || price < 0) {
+        return ResponseHandler.error(res, 'Price must be a positive number.');
+    }
+    if (isNaN(quantity) || !Number.isInteger(quantity) || quantity < 1) {
+        return ResponseHandler.error(res, 'Quantity must be a valid positive integer.')
+    }
+    next();
+}
+
 const isValidEmailAddress = (email: string): boolean => /^\S+@\S+\.\S+$/.test(email);

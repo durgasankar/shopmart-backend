@@ -65,8 +65,6 @@ router.get('/dashboard', (req: Request, res: Response) => {
     }
     res.render('dashboard', { user });
 });
-``
-
 
 
 export default router;

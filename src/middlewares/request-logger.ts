@@ -3,12 +3,21 @@ import { logger } from "../configs/winston-logger";
 
 export const requestLogger = (req: Request, res: Response, next: NextFunction) => {
     const start = Date.now();
+    let responseBody: any;
+
+    const originalJson = res.json.bind(res);
+    res.json = (body: any) => {
+        responseBody = body;
+        return originalJson(body);
+    };
+
     res.on("finish", () => {
         const duration = Date.now() - start;
         logger.info({
             method: req.method,
             url: req.originalUrl,
-            body: req.body,
+            requestBody: req.body,
+            responseBody: responseBody,
             status: res.statusCode,
             duration: `${duration}ms`,
             ip: req.ip,
