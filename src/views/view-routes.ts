@@ -60,14 +60,36 @@ router.get('/logout', (req: Request, res: Response) => {
     });
 });
 
-router.get('/dashboard', (req: Request, res: Response) => {
-    const user = (req.session as any).user;
-    if (!user) return res.redirect('/login');
-    const success = req.query.success;
-    const error = req.query.error;
-    res.render('dashboard', { user, success, error });
+router.get('/dashboard', async (req: Request, res: Response) => {
+    try {
+        const user = (req.session as any).user;
+        if (!user) return res.redirect('/login');
+        const response = await axios.get(
+            'http://localhost:5000/api/product/all',
+            {
+                headers: {
+                    Authorization: `Bearer ${user.token}`
+                }
+            }
+        );
+        const products = response.data.data || [];
+        const success = req.query.success;
+        const error = req.query.error;
+        res.render('dashboard', {
+            user,
+            products,
+            success,
+            error
+        });
+    } catch (error: any) {
+        console.error(error.message);
+        res.render('dashboard', {
+            user: (req.session as any).user,
+            products: [],
+            error: "Failed to load products"
+        });
+    }
 });
-
 
 router.post(
     '/add-product',
@@ -92,7 +114,10 @@ router.post(
                 'http://localhost:5000/api/product/add',
                 formData,
                 {
-                    headers: formData.getHeaders()
+                    headers: {
+                        ...formData.getHeaders(),
+                        Authorization: `Bearer ${user.token}`
+                    }
                 }
             );
             const message = response.data.message || "Product added successfully";
@@ -104,6 +129,12 @@ router.post(
         }
     }
 );
+
+router.post('/add-to-cart', (req: Request, res: Response) => {
+    const { productId } = req.body;
+    console.log("Added to cart:", productId);
+    res.redirect('/dashboard?success=Product added to cart');
+});
 ``
 
 

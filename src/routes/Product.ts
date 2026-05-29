@@ -1,10 +1,14 @@
 import { Router } from "express";
 import { ProductControlller } from "../controllers/Product";
-import { validateAddProductRequest } from "../middlewares/validate";
 import { upload } from "../middlewares/upload";
+import { validateAddProductRequest } from "../middlewares/validate";
+import { authenticate } from "../middlewares/auth-validator";
 
 const router = Router();
-const { addProductController } = new ProductControlller;
+const { addProductController, getAllProductsController } = new ProductControlller;
+
+// jwt auth bearer token handler
+router.use(authenticate);
 
 router.post(
     '/add',
@@ -12,5 +16,8 @@ router.post(
     validateAddProductRequest,
     addProductController
 );
+
+router.get('/all', getAllProductsController)
+
 
 export default router;

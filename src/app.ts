@@ -25,7 +25,7 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(
     session({
-        secret: 'your-secret-key',
+        secret: process.env.EXPRESS_SESSION_SECRET as string,
         resave: false,
         saveUninitialized: false,
         cookie: {

@@ -1,4 +1,7 @@
+import { logger } from "../configs/winston-logger";
+import { Productresponse } from "../dtos/response-product";
 import Product, { ProductAttributes } from "../models/Product";
+import { formatDateTime } from "../utils/date-time-formatter";
 
 export class ProductService {
 
@@ -27,5 +30,16 @@ export class ProductService {
         const createdProduct = await Product.create({ ...newProduct });
         const generatedProductId: string = this.getProductUniqueIdentifier(createdProduct);
         return generatedProductId;
+    }
+
+    public async getAllProducts(): Promise<Productresponse[]> {
+        const products = await Product.findAll();
+        const filteredProducts: Productresponse[] = products.map(product => {
+            // removing image as its making response heavy
+            const { image, updatedAt, createdAt, ...rest } = product.toJSON();
+            const addedOn: string = formatDateTime(createdAt);
+            return {...rest, addedOn};
+        })
+        return filteredProducts;
     }
 }

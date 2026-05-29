@@ -12,7 +12,7 @@ export class ProductControlller extends BaseController {
         this.productService = new ProductService();
     }
 
-    public addProductController = async (req: Request, res: Response, next: NextFunction) => {
+    public addProductController = async (req: Request, res: Response) => {
         try {
             const newProduct = getAddProductFormattedBody(req.body);
             // add image path
@@ -23,6 +23,17 @@ export class ProductControlller extends BaseController {
             return this.created(res, "Registration successful.", { productId });
         } catch (error: any) {
             const message: string = `Product registration Error: ${error.message}`
+            logger.error(message);
+            return this.badRequest(res, message);
+        }
+    }
+
+    public getAllProductsController = async (req: Request, res: Response) => {
+        try {
+            const products = await this.productService.getAllProducts();
+            return this.ok(res, "Available products.", products);
+        } catch (error: any) {
+            const message: string = `Fetch products error: ${error.message}`
             logger.error(message);
             return this.badRequest(res, message);
         }
