@@ -1,5 +1,8 @@
 import { Router, Request, Response } from "express";
 import axios from "axios";
+import FormData from "form-data";
+import fs from "fs";
+import { upload } from "../middlewares/upload";
 
 const router = Router();
 
@@ -58,13 +61,50 @@ router.get('/logout', (req: Request, res: Response) => {
 });
 
 router.get('/dashboard', (req: Request, res: Response) => {
-    console.log("Session data:", req.session);
     const user = (req.session as any).user;
-    if (!user) {
-        return res.redirect('/login');
-    }
-    res.render('dashboard', { user });
+    if (!user) return res.redirect('/login');
+    const success = req.query.success;
+    const error = req.query.error;
+    res.render('dashboard', { user, success, error });
 });
+
+
+router.post(
+    '/add-product',
+    upload.single('image'),
+    async (req: Request, res: Response) => {
+        try {
+            const user = (req.session as any).user;
+            if (!user) return res.redirect('/login');
+
+            const formData = new FormData();
+            formData.append('name', req.body.name);
+            formData.append('category', req.body.category);
+            formData.append('price', req.body.price);
+            formData.append('quantity', req.body.quantity);
+            if (req.file) {
+                formData.append('image', req.file.buffer, {
+                    filename: req.file.originalname,
+                    contentType: req.file.mimetype
+                });
+            }
+            const response = await axios.post(
+                'http://localhost:5000/api/product/add',
+                formData,
+                {
+                    headers: formData.getHeaders()
+                }
+            );
+            const message = response.data.message || "Product added successfully";
+            res.redirect(`/dashboard?success=${encodeURIComponent(message)}`);
+        } catch (error: any) {
+            const errMsg =
+                error.response?.data?.message || error.message || "Failed to add product";
+            res.redirect(`/dashboard?error=${encodeURIComponent(errMsg)}`);
+        }
+    }
+);
+``
 
 
 export default router;

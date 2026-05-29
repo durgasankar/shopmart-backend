@@ -1,4 +1,5 @@
 import express, { Application } from 'express';
+import dotenv from 'dotenv';
 import cors from 'cors';
 import path from 'path';
 import session from 'express-session';
@@ -8,6 +9,8 @@ import viewRoutes from './views/view-routes';
 
 
 const app: Application = express()
+// loading env configs
+dotenv.config();
 
 app.use(cors());
 app.use(express.json());
@@ -26,10 +29,13 @@ app.use(
         resave: false,
         saveUninitialized: false,
         cookie: {
-            secure: false 
+            secure: false, 
+            httpOnly: true, 
+            maxAge: 24 * 60 * 60 * 1000
         }
     })
 );
+app.use('/uploads', express.static('uploads'));
 
 // register routes
 app.use('/api', routes)

@@ -2,6 +2,12 @@
 <html>
 <head>
     <title>Dashboard</title>
+    <style>
+        .same-line {
+            display: flex;
+            gap: 5px;
+        }
+    </style>
 </head>
 <body>
     <h2>Dashboard</h2>
@@ -12,6 +18,31 @@
     <p><b>Token:</b></p>
     <pre><%= user.token %></pre>
     <br>
+    <br><br>
+    <section>
+        <h2>➕ Add Product Section</h2>
+        <form action="/add-product" method="POST" enctype="multipart/form-data">
+            <div class="same-line">
+                <input placeholder="name" type="text" name="name" required />
+                <input placeholder="category" type="text" name="category" required />
+            </div>
+            <br>
+            <div class="same-line">
+                <input placeholder="price" type="number" name="price" required />
+                <input placeholder="quantity" type="number" name="quantity" required />
+            </div>
+            <label>Image:</label><br>
+            <input type="file" name="image" accept="image/*" /><br><br>
+            <button type="submit">Add Product</button>
+        </form>
+        <% if (success) { %>
+            <p style="color: green;"><%= success %></p>
+        <% } %>
+        <% if (error) { %>
+            <p style="color: red;"><%= error %></p>
+        <% } %>
+    </section>
+
     <a href="/logout">Logout</a>
 </body>
 </html>

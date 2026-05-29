@@ -28,8 +28,8 @@ export const validateAddProductRequest = (req: Request, res: Response, next: Nex
     if (isNaN(price) || price < 0) {
         return ResponseHandler.error(res, 'Price must be a positive number.');
     }
-    if (isNaN(quantity) || !Number.isInteger(quantity) || quantity < 1) {
-        return ResponseHandler.error(res, 'Quantity must be a valid positive integer.')
+    if (isNaN(quantity) || quantity < 1) {
+        return ResponseHandler.error(res, 'Quantity must be a valid positive integer.');
     }
     next();
 }

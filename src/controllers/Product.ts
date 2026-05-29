@@ -15,6 +15,10 @@ export class ProductControlller extends BaseController {
     public addProductController = async (req: Request, res: Response, next: NextFunction) => {
         try {
             const newProduct = getAddProductFormattedBody(req.body);
+            // add image path
+            if (req.file) {
+                newProduct.image = req.file.buffer;
+            }
             const productId: string = await this.productService.addNewProduct(newProduct);
             return this.created(res, "Registration successful.", { productId });
         } catch (error: any) {

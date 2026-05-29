@@ -7,7 +7,7 @@ export interface ProductAttributes {
     price: number;
     category: string;
     quantity: number;
-    image?: string;
+    image?: Buffer;
     createdAt?: Date;
     updatedAt?: Date;
 }
@@ -15,12 +15,13 @@ export interface ProductAttributes {
 interface ProductCreationAtttribute extends Optional<ProductAttributes, 'id'> { }
 
 class Product extends Model<ProductAttributes, ProductCreationAtttribute> implements ProductAttributes {
+
     public id!: number;
     public name!: string;
     public category!: string;
     public price!: number;
     public quantity!: number;
-    public image!: string;
+    public image!: Buffer;
     public readonly createdAt!: Date;
     public readonly updatedAt!: Date;
 }
@@ -48,7 +49,7 @@ Product.init({
         allowNull: false,
     },
     image: {
-        type: DataTypes.STRING,
+        type: DataTypes.BLOB('long'),
         allowNull: true,
     }
 }, {
@@ -56,6 +57,6 @@ Product.init({
     underscored: true,
     timestamps: true,
     tableName: 'products'
-})
+});
 
 export default Product;
