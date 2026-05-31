@@ -1,5 +1,4 @@
 import { logger } from "../configs/winston-logger";
-import { Productresponse } from "../dtos/response-product";
 import Product, { ProductAttributes } from "../models/Product";
 import { formatDateTime } from "../utils/date-time-formatter";
 
@@ -32,14 +31,26 @@ export class ProductService {
         return generatedProductId;
     }
 
-    public async getAllProducts(): Promise<Productresponse[]> {
+    public async getAllProducts(): Promise<any[]> {
         const products = await Product.findAll();
-        const filteredProducts: Productresponse[] = products.map(product => {
-            // removing image as its making response heavy
-            const { image, updatedAt, createdAt, ...rest } = product.toJSON();
+        const filteredProducts = products.map(product => {
+            const productJson = product.toJSON();
+            const { image, createdAt, updatedAt, ...rest } = productJson;
+            // Converting to base64 img
+            let base64Image = null;
+            if (image && Buffer.isBuffer(image)) {
+                base64Image = `data:image/jpeg;base64,${image.toString('base64')}`;
+            } else if (image && (image as any).type === 'Buffer') {
+                const buf = Buffer.from((image as any).data);
+                base64Image = `data:image/jpeg;base64,${buf.toString('base64')}`;
+            }
             const addedOn: string = formatDateTime(createdAt);
-            return {...rest, addedOn};
-        })
+            return {
+                ...rest,
+                addedOn,
+                imageUrl: base64Image
+            };
+        });
         return filteredProducts;
     }
 }

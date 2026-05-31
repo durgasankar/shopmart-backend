@@ -17,7 +17,7 @@ export const requestLogger = (req: Request, res: Response, next: NextFunction) =
             method: req.method,
             url: req.originalUrl,
             requestBody: req.body,
-            responseBody: responseBody,
+            // responseBody: responseBody,
             status: res.statusCode,
             duration: `${duration}ms`,
             ip: req.ip,
