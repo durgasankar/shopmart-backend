@@ -32,7 +32,7 @@ export class CartController {
 
     public updateQty = async (req: Request, res: Response) => {
         try {
-            const userId = (req as any).user.id;
+            const userId = (req as any).user.userId;
             const { productId, action } = req.body;
             const cart = await this.cartService.updateQuantity(userId, Number(productId), action);
             
@@ -47,7 +47,7 @@ export class CartController {
 
     public removeItem = async (req: Request, res: Response) => {
         try {
-            const userId = (req as any).user.id;
+            const userId = (req as any).user.userId;
             const { productId } = req.body;
             const cart = await this.cartService.removeItem(userId, Number(productId));
             

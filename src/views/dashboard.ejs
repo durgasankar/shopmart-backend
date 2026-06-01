@@ -38,10 +38,19 @@
             display: inline-block;
             margin: 0;
         }
+        .align-right{
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
     </style>
 </head>
 <body>
-    <h1>Dashboard</h1>
+    <header class="align-right">
+        <h1>Dashboard</h1>
+        <a href="/logout">Logout</a>
+    </header>
     <section>
         <p><b>Name:</b> <%= user.firstName %> <%= user.lastName %></p>
         <p><b>Email:</b> <%= user.email %> | <%= user.mobileNumber %></p>
@@ -63,12 +72,6 @@
             <input type="file" name="image" accept="image/*" /><br><br>
             <button type="submit">Add Product</button>
         </form>
-        <% if (typeof success !== 'undefined' && success) { %>
-            <p style="color: green;"><%= success %></p>
-        <% } %>
-        <% if (typeof error !== 'undefined' && error) { %>
-            <p style="color: red;"><%= error %></p>
-        <% } %>
     </section>
 
     <section>
@@ -129,7 +132,12 @@
     </section>
 
     <br>
-    <a href="/logout">Logout</a>
+    <% if (typeof success !== 'undefined' && success) { %>
+        <p style="color: green;"><%= success %></p>
+    <% } %>
+    <% if (typeof error !== 'undefined' && error) { %>
+        <p style="color: red;"><%= error %></p>
+    <% } %>
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
@@ -144,7 +152,6 @@
             console.log("Received live cart update:", updatedCart);
             renderCart(updatedCart);
         });
-
         // Dynamic Cart Rendering
         function renderCart(cartData) {
             const tbody = document.getElementById("cart-body");
@@ -169,9 +176,7 @@
                                 <input type="hidden" name="action" value="dec">
                                 <button type="submit" class="qty-btn">-</button>
                             </form>
-                            
                             <span><b>${item.quantity}</b></span>
-                            
                             <form action="/cart-update" method="POST" class="action-inline-form">
                                 <input type="hidden" name="productId" value="${item.productId}">
                                 <input type="hidden" name="action" value="inc">
@@ -193,6 +198,7 @@
         
         const serverCartData = JSON.parse('<%- JSON.stringify(typeof cart !== "undefined" && cart ? cart : { items: [], totalAmount: 0 }) %>');
         renderCart(serverCartData);
+        
     </script>
 </body>
 </html>

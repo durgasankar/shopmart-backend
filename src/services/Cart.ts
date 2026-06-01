@@ -1,3 +1,4 @@
+import { logger } from "../configs/winston-logger";
 import Cart from "../models/Cart";
 import Product from "../models/Product";
 
@@ -11,6 +12,13 @@ export class CartService {
         }, 0);
     }
 
+    private isValidQuantity(newQuantity: number, availableQuantity: number): boolean {
+        if (newQuantity < 0) return false;
+        if (newQuantity > availableQuantity) return false;
+        return true;
+    }
+
+
     public async getUserCart(userId: string) {
         let cart = await Cart.findOne({ userId });
         if (!cart) {
@@ -20,18 +28,24 @@ export class CartService {
     }
 
     public async addToCart(userId: string, productId: number) {
-        const product = await Product.findByPk(productId);
+        const product = await Product.findByPk(productId, {
+            attributes: ['price', 'name', 'quantity'],
+            raw: true
+        });
         if (!product) throw new Error("Product not found");
         let cart = await this.getUserCart(userId);
-        const existingItem = cart.items.find(i => i.productId === productId);
+        const existingItem = cart.items.find(item => item.productId === productId);
+        const { price, name, quantity } = product;
         if (existingItem) {
+            if (!this.isValidQuantity(existingItem.quantity + 1, quantity)) {
+                throw new Error("Cannot add more than available stock");
+            }
             existingItem.quantity += 1;
         } else {
-            const productPrice = typeof product.price === 'number' ? product.price : parseFloat(product.price as any) || 0;
             cart.items.push({
                 productId,
-                name: product.name,
-                price: productPrice,
+                name,
+                price,
                 quantity: 1
             });
         }
@@ -40,13 +54,25 @@ export class CartService {
         return cart;
     }
 
-
     public async updateQuantity(userId: string, productId: number, action: "inc" | "dec") {
+        logger.info(`${userId}-${productId}-${action}`)
+        // get user cart
         const cart = await this.getUserCart(userId);
-        const item = cart.items.find(i => i.productId === productId);
+        const item = cart.items.find(item => item.productId === productId);
         if (!item) throw new Error("Item not found");
-        if (action === "inc") item.quantity += 1;
-        else item.quantity -= 1;
+        // fetch only available stock
+        const availableQuantity = (await Product.findByPk(productId, {
+            attributes: ['quantity'],
+            raw: true
+        }))?.quantity as number;
+        const newQuantity =
+            action === "inc"
+                ? item.quantity + 1
+                : item.quantity - 1;
+        if (!this.isValidQuantity(newQuantity, availableQuantity)) {
+            throw new Error("Cannot add more than available stock");
+        }
+        item.quantity = newQuantity;
         if (item.quantity <= 0) {
             cart.items = cart.items.filter(i => i.productId !== productId);
         }
@@ -57,7 +83,7 @@ export class CartService {
 
     public async removeItem(userId: string, productId: number) {
         const cart = await this.getUserCart(userId);
-        cart.items = cart.items.filter(i => i.productId !== productId);
+        cart.items = cart.items.filter(item => item.productId !== productId);
         cart.totalAmount = this.calculateTotal(cart.items);
         await cart.save();
         return cart;
