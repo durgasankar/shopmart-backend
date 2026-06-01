@@ -61,35 +61,44 @@ router.get('/logout', (req: Request, res: Response) => {
 });
 
 router.get('/dashboard', async (req: Request, res: Response) => {
+    const user = (req.session as any).user;
+    if (!user) return res.redirect('/login');
+    let products = [];
+    let cart = { items: [], totalAmount: 0 };
+    let errorMsg = req.query.error ? String(req.query.error) : null;
+    const successMsg = req.query.success ? String(req.query.success) : null;
+
     try {
-        const user = (req.session as any).user;
-        if (!user) return res.redirect('/login');
-        const response = await axios.get(
+        const productResponse = await axios.get(
             'http://localhost:5000/api/product/all',
-            {
-                headers: {
-                    Authorization: `Bearer ${user.token}`
-                }
-            }
+            { headers: { Authorization: `Bearer ${user.token}` } }
         );
-        const products = response.data.data || [];
-        const success = req.query.success;
-        const error = req.query.error;
-        res.render('dashboard', {
-            user,
-            products,
-            success,
-            error
-        });
-    } catch (error: any) {
-        console.error(error.message);
-        res.render('dashboard', {
-            user: (req.session as any).user,
-            products: [],
-            error: "Failed to load products"
-        });
+        products = productResponse.data.data || [];
+    } catch (prodError: any) {
+        console.error("Product API error:", prodError.message);
+        errorMsg = "Failed to load products.";
     }
+
+    try {
+        const cartResponse = await axios.get(
+            'http://localhost:5000/api/cart/all',
+            { headers: { Authorization: `Bearer ${user.token}` } }
+        );
+        cart = cartResponse.data?.data || { items: [], totalAmount: 0 };
+    } catch (cartError: any) {
+        console.error("Cart API error:", cartError.message);
+    }
+    res.render('dashboard', {
+        user,
+        products,
+        cart,
+        success: successMsg,
+        error: errorMsg
+    });
 });
+
+
+
 
 router.post(
     '/add-product',
@@ -130,12 +139,69 @@ router.post(
     }
 );
 
-router.post('/add-to-cart', (req: Request, res: Response) => {
-    const { productId } = req.body;
-    console.log("Added to cart:", productId);
-    res.redirect('/dashboard?success=Product added to cart');
+
+router.post('/add-to-cart', async (req: Request, res: Response) => {
+    try {
+        const user = (req.session as any).user;
+        if (!user) return res.redirect('/login');
+        await axios.post(
+            'http://localhost:5000/api/cart/add',
+            {
+                productId: req.body.productId
+            },
+            {
+                headers: {
+                    Authorization: `Bearer ${user.token}`
+                }
+            }
+        );
+        res.redirect('/dashboard?success=Added to cart');
+    } catch (err: any) {
+        res.redirect(`/dashboard?error=${encodeURIComponent(err.message)}`);
+    }
 });
-``
+
+router.post('/cart-update', async (req: Request, res: Response) => {
+    try {
+        const user = (req.session as any).user;
+        await axios.post(
+            'http://localhost:5000/api/cart/update',
+            {
+                productId: req.body.productId,
+                action: req.body.action
+            },
+            {
+                headers: {
+                    Authorization: `Bearer ${user.token}`
+                }
+            }
+        );
+        res.redirect('/dashboard');
+    } catch (err: any) {
+        res.redirect('/dashboard?error=Update failed');
+    }
+});
+
+router.post('/cart-remove', async (req: Request, res: Response) => {
+    try {
+        const user = (req.session as any).user;
+        await axios.post(
+            'http://localhost:5000/api/cart/remove',
+            {
+                productId: req.body.productId
+            },
+            {
+                headers: {
+                    Authorization: `Bearer ${user.token}`
+                }
+            }
+        );
+        res.redirect('/dashboard');
+    } catch (err: any) {
+        res.redirect('/dashboard?error=Remove failed');
+    }
+});
+
 
 
 export default router;

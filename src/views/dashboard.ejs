@@ -52,7 +52,7 @@
                     <div class="card">
                         <div style="width: 100%; height: 150px;">
                             <img 
-                                src="<%= product.imageUrl ? product.imageUrl : 'NA' %>" 
+                                src="<%= product.imageUrl %>" 
                                 alt="<%= product.name %>"
                                 style="width: 100%; height: 100%; object-fit: cover;"
                             />
@@ -73,6 +73,31 @@
             <% } else { %>
                 <p>No products available</p>
             <% } %>
+        </div>
+    </section>
+
+    <section>
+        <h2>🛒 Shopping Cart</h2>
+        <div id="cart-container">
+            <table border="1" style="width: 100%; border-collapse: collapse; text-align: left;">
+                <thead>
+                    <tr style="background-color: #f2f2f2;">
+                        <th style="padding: 10px;">Product</th>
+                        <th style="padding: 10px;">Price</th>
+                        <th style="padding: 10px;">Quantity</th>
+                        <th style="padding: 10px;">Subtotal</th>
+                        <th style="padding: 10px;">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="cart-body">
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="3" style="text-align: right; padding: 10px;"><b>Total Amount:</b></td>
+                        <td colspan="2" style="padding: 10px;"><b>₹<span id="cart-total">0</span></b></td>
+                    </tr>
+                </tfoot>
+            </table>
         </div>
     </section>
 
