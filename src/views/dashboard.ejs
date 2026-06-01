@@ -7,11 +7,36 @@
             display: flex;
             gap: 5px;
         }
-        .card{
+        .card {
             border: 1px solid #cccc;
             width: 220px;
             border-radius: 4px;
             overflow: hidden;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+        }
+        .remove-btn {
+            background-color: #ff4d4d;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .qty-container {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .action-inline-form {
+            display: inline-block;
+            margin: 0;
         }
     </style>
 </head>
@@ -24,6 +49,7 @@
         <pre><%= user.token %></pre>
         <br>
     </section>
+    
     <section>
         <h2>Add Product Section</h2>
         <form action="/add-product" method="POST" enctype="multipart/form-data">
@@ -37,13 +63,14 @@
             <input type="file" name="image" accept="image/*" /><br><br>
             <button type="submit">Add Product</button>
         </form>
-        <% if (success) { %>
+        <% if (typeof success !== 'undefined' && success) { %>
             <p style="color: green;"><%= success %></p>
         <% } %>
-        <% if (error) { %>
+        <% if (typeof error !== 'undefined' && error) { %>
             <p style="color: red;"><%= error %></p>
         <% } %>
     </section>
+
     <section>
         <h2>Product List</h2>
         <div style="display: flex; flex-wrap: wrap; gap: 20px;">
@@ -79,28 +106,93 @@
     <section>
         <h2>🛒 Shopping Cart</h2>
         <div id="cart-container">
-            <table border="1" style="width: 100%; border-collapse: collapse; text-align: left;">
+            <table>
                 <thead>
                     <tr style="background-color: #f2f2f2;">
-                        <th style="padding: 10px;">Product</th>
-                        <th style="padding: 10px;">Price</th>
-                        <th style="padding: 10px;">Quantity</th>
-                        <th style="padding: 10px;">Subtotal</th>
-                        <th style="padding: 10px;">Action</th>
+                        <th>Name</th>
+                        <th>Price</th>
+                        <th>Quantity</th>
+                        <th>Subtotal</th>
+                        <th>Action</th>
                     </tr>
                 </thead>
                 <tbody id="cart-body">
                 </tbody>
                 <tfoot>
                     <tr>
-                        <td colspan="3" style="text-align: right; padding: 10px;"><b>Total Amount:</b></td>
-                        <td colspan="2" style="padding: 10px;"><b>₹<span id="cart-total">0</span></b></td>
+                        <td colspan="3" style="text-align: right;"><b>Total Amount:</b></td>
+                        <td colspan="2"><b>₹<span id="cart-total">0</span></b></td>
                     </tr>
                 </tfoot>
             </table>
         </div>
     </section>
 
+    <br>
     <a href="/logout">Logout</a>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        const userEmail = "<%= user.email %>";
+        
+        socket.on("connect", () => {
+            console.log("Connected with email:", userEmail);
+            socket.emit("join", userEmail);
+        });
+        socket.on("cartUpdated", (updatedCart) => {
+            console.log("Received live cart update:", updatedCart);
+            renderCart(updatedCart);
+        });
+
+        // Dynamic Cart Rendering
+        function renderCart(cartData) {
+            const tbody = document.getElementById("cart-body");
+            const totalSpan = document.getElementById("cart-total");
+            tbody.innerHTML = "";
+            if (!cartData || !cartData.items || cartData.items.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 20px;">Your cart is empty.</td></tr>';
+                totalSpan.innerText = "0";
+                return;
+            }
+            totalSpan.innerText = cartData.totalAmount || 0;
+            cartData.items.forEach(item => {
+                const subtotal = item.price * item.quantity;
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${item.name}</td>
+                    <td>₹${item.price}</td>
+                    <td>
+                        <div class="qty-container">
+                            <form action="/cart-update" method="POST" class="action-inline-form">
+                                <input type="hidden" name="productId" value="${item.productId}">
+                                <input type="hidden" name="action" value="dec">
+                                <button type="submit" class="qty-btn">-</button>
+                            </form>
+                            
+                            <span><b>${item.quantity}</b></span>
+                            
+                            <form action="/cart-update" method="POST" class="action-inline-form">
+                                <input type="hidden" name="productId" value="${item.productId}">
+                                <input type="hidden" name="action" value="inc">
+                                <button type="submit" class="qty-btn">+</button>
+                            </form>
+                        </div>
+                    </td>
+                    <td>₹${subtotal}</td>
+                    <td>
+                        <form action="/cart-remove" method="POST" class="action-inline-form">
+                            <input type="hidden" name="productId" value="${item.productId}">
+                            <button type="submit" class="remove-btn">Delete</button>
+                        </form>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+        
+        const serverCartData = JSON.parse('<%- JSON.stringify(typeof cart !== "undefined" && cart ? cart : { items: [], totalAmount: 0 }) %>');
+        renderCart(serverCartData);
+    </script>
 </body>
 </html>

@@ -61,40 +61,36 @@ router.get('/logout', (req: Request, res: Response) => {
 });
 
 router.get('/dashboard', async (req: Request, res: Response) => {
-    const user = (req.session as any).user;
-    if (!user) return res.redirect('/login');
-    let products = [];
-    let cart = { items: [], totalAmount: 0 };
-    let errorMsg = req.query.error ? String(req.query.error) : null;
-    const successMsg = req.query.success ? String(req.query.success) : null;
-
     try {
-        const productResponse = await axios.get(
-            'http://localhost:5000/api/product/all',
-            { headers: { Authorization: `Bearer ${user.token}` } }
-        );
-        products = productResponse.data.data || [];
-    } catch (prodError: any) {
-        console.error("Product API error:", prodError.message);
-        errorMsg = "Failed to load products.";
-    }
+        const user = (req.session as any).user;
+        if (!user) return res.redirect('/login');
 
-    try {
-        const cartResponse = await axios.get(
-            'http://localhost:5000/api/cart/all',
-            { headers: { Authorization: `Bearer ${user.token}` } }
-        );
-        cart = cartResponse.data?.data || { items: [], totalAmount: 0 };
-    } catch (cartError: any) {
-        console.error("Cart API error:", cartError.message);
+        // Fetch products
+        const productResponse = await axios.get('http://localhost:5000/api/product/all', {
+            headers: { Authorization: `Bearer ${user.token}` }
+        });
+
+        // Fetch cart
+        let cart = { items: [], totalAmount: 0 };
+        try {
+            const cartResponse = await axios.get('http://localhost:5000/api/cart/all', {
+                headers: { Authorization: `Bearer ${user.token}` }
+            });
+            cart = cartResponse.data.data || { items: [], totalAmount: 0 };
+        } catch(cErr) {
+            console.error("Cart API failed, falling back to empty cart");
+        }
+
+        res.render('dashboard', {
+            user,
+            products: productResponse.data.data || [],
+            cart: cart, // <-- CRITICAL: MUST BE PASSED HERE TO FEED INITIAL HYDRATION
+            success: req.query.success || null,
+            error: req.query.error || null
+        });
+    } catch (error: any) {
+        res.render('login', { error: "Session expired or backend unreachable" });
     }
-    res.render('dashboard', {
-        user,
-        products,
-        cart,
-        success: successMsg,
-        error: errorMsg
-    });
 });
 
 
@@ -140,14 +136,16 @@ router.post(
 );
 
 
+// src/views/view-routes.ts
 router.post('/add-to-cart', async (req: Request, res: Response) => {
     try {
         const user = (req.session as any).user;
         if (!user) return res.redirect('/login');
+        
         await axios.post(
             'http://localhost:5000/api/cart/add',
             {
-                productId: req.body.productId
+                productId: Number(req.body.productId)
             },
             {
                 headers: {
@@ -157,7 +155,8 @@ router.post('/add-to-cart', async (req: Request, res: Response) => {
         );
         res.redirect('/dashboard?success=Added to cart');
     } catch (err: any) {
-        res.redirect(`/dashboard?error=${encodeURIComponent(err.message)}`);
+        const errorMsg = err.response?.data?.message || err.message;
+        res.redirect(`/dashboard?error=${encodeURIComponent(errorMsg)}`);
     }
 });
 

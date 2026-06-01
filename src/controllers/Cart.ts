@@ -7,7 +7,7 @@ export class CartController {
 
     public getCart = async (req: Request, res: Response) => {
         try {
-            const userId = (req as any).user.id;
+            const userId = (req as any).user.userId;
             const cart = await this.cartService.getUserCart(userId);
             res.json({ success: true, data: cart });
         } catch (error: any) {
@@ -17,7 +17,7 @@ export class CartController {
 
     public addToCart = async (req: Request, res: Response) => {
         try {
-            const userId = (req as any).user.id;
+            const userId = (req as any).user.userId;
             const { productId } = req.body;
             const cart = await this.cartService.addToCart(userId, Number(productId));
             

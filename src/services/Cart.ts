@@ -4,7 +4,11 @@ import Product from "../models/Product";
 export class CartService {
 
     private calculateTotal(items: any[]): number {
-        return items.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+        return items.reduce((total, item) => {
+            const cleanPrice = parseFloat(item.price) || 0;
+            const cleanQuantity = parseInt(item.quantity, 10) || 0;
+            return total + (cleanPrice * cleanQuantity);
+        }, 0);
     }
 
     public async getUserCart(userId: string) {
@@ -23,10 +27,11 @@ export class CartService {
         if (existingItem) {
             existingItem.quantity += 1;
         } else {
+            const productPrice = typeof product.price === 'number' ? product.price : parseFloat(product.price as any) || 0;
             cart.items.push({
                 productId,
                 name: product.name,
-                price: product.price,
+                price: productPrice,
                 quantity: 1
             });
         }
@@ -34,6 +39,7 @@ export class CartService {
         await cart.save();
         return cart;
     }
+
 
     public async updateQuantity(userId: string, productId: number, action: "inc" | "dec") {
         const cart = await this.getUserCart(userId);
