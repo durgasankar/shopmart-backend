@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response } from "express";
+import { Request, Response } from "express";
 import { BaseController } from "./base-controller";
 import { ProductService } from "../services/Product";
 import { logger } from "../configs/winston-logger";

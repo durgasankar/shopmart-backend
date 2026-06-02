@@ -5,6 +5,7 @@ import { authenticate } from "../middlewares/auth-validator";
 const router = Router();
 const controller = new CartController();
 
+// jwt auth bearer token handler
 router.use(authenticate);
 
 router.get("/all", controller.getCartController);

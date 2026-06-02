@@ -3,7 +3,6 @@ import User, { UserAttributes } from "../models/User";
 import { RegistrationUserResponse } from '../dtos/registration-user';
 import { LoginUserResponse } from '../dtos/login-user';
 import { generateToken } from '../configs/jwt';
-import { logger } from '../configs/winston-logger';
 export class UserServices {
     HASH_SALT_ROUND: number = 10;
 

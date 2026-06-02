@@ -1,4 +1,4 @@
-import { Request, Response, Router } from "express";
+import { Router } from "express";
 import { UserController } from "../controllers/User";
 import { validateRegisterRequest, validateLoginRequest } from "../middlewares/validate";
 

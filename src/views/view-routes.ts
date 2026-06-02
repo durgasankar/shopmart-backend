@@ -1,27 +1,22 @@
 import { Router, Request, Response } from "express";
 import axios from "axios";
 import FormData from "form-data";
-import fs from "fs";
 import { upload } from "../middlewares/upload";
 
 const router = Router();
 
-// Home page
 router.get('/', (req: Request, res: Response) => {
     res.render('index');
 });
 
-// Register page
 router.get('/register', (req: Request, res: Response) => {
     res.render('register');
 });
 
-// Login page
 router.get('/login', (req: Request, res: Response) => {
     res.render('login');
 });
 
-// Handle register form
 router.post('/register', async (req: Request, res: Response) => {
     try {
         const response = await axios.post('http://localhost:5000/api/user/register', req.body);
@@ -31,7 +26,6 @@ router.post('/register', async (req: Request, res: Response) => {
     }
 });
 
-// Handle login form
 router.post('/login', async (req: Request, res: Response) => {
     try {
         const response = await axios.post('http://localhost:5000/api/user/login', {
@@ -52,7 +46,6 @@ router.post('/login', async (req: Request, res: Response) => {
         });
     }
 });
-``
 
 router.get('/logout', (req: Request, res: Response) => {
     req.session.destroy(() => {
@@ -64,12 +57,10 @@ router.get('/dashboard', async (req: Request, res: Response) => {
     try {
         const user = (req.session as any).user;
         if (!user) return res.redirect('/login');
-
         // Fetch products
         const productResponse = await axios.get('http://localhost:5000/api/product/all', {
             headers: { Authorization: `Bearer ${user.token}` }
         });
-
         // Fetch cart
         let cart = { items: [], totalAmount: 0 };
         try {
@@ -80,11 +71,10 @@ router.get('/dashboard', async (req: Request, res: Response) => {
         } catch(cErr) {
             console.error("Cart API failed, falling back to empty cart");
         }
-
         res.render('dashboard', {
             user,
             products: productResponse.data.data || [],
-            cart: cart, // <-- CRITICAL: MUST BE PASSED HERE TO FEED INITIAL HYDRATION
+            cart,
             success: req.query.success || null,
             error: req.query.error || null
         });
@@ -93,9 +83,6 @@ router.get('/dashboard', async (req: Request, res: Response) => {
     }
 });
 
-
-
-
 router.post(
     '/add-product',
     upload.single('image'),
@@ -103,7 +90,6 @@ router.post(
         try {
             const user = (req.session as any).user;
             if (!user) return res.redirect('/login');
-
             const formData = new FormData();
             formData.append('name', req.body.name);
             formData.append('category', req.body.category);
@@ -135,8 +121,6 @@ router.post(
     }
 );
 
-
-// src/views/view-routes.ts
 router.post('/add-to-cart', async (req: Request, res: Response) => {
     try {
         const user = (req.session as any).user;
@@ -177,7 +161,7 @@ router.post('/cart-update', async (req: Request, res: Response) => {
         );
         res.redirect('/dashboard');
     } catch (err: any) {
-        res.redirect('/dashboard?error=Update failed');
+        res.redirect(`/dashboard?error=Update failed ${err.message}`);
     }
 });
 
@@ -197,10 +181,9 @@ router.post('/cart-remove', async (req: Request, res: Response) => {
         );
         res.redirect('/dashboard');
     } catch (err: any) {
-        res.redirect('/dashboard?error=Remove failed');
+        res.redirect(`/dashboard?error=Remove failed ${err.message}`);
     }
 });
-
 
 
 export default router;

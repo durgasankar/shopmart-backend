@@ -10,7 +10,6 @@ export const initSocket = (server: HTTPServer): Server => {
             origin: "*"
         }
     });
-
     io.on("connection", (socket) => {
         logger.warn("Socket connected: " + socket.id)
         socket.on("join", (userId: string) => {
