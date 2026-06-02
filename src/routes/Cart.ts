@@ -7,9 +7,9 @@ const controller = new CartController();
 
 router.use(authenticate);
 
-router.get("/all", controller.getCart);
-router.post("/add", controller.addToCart);
-router.post("/update", controller.updateQty);
-router.post("/remove", controller.removeItem);
+router.get("/all", controller.getCartController);
+router.post("/add", controller.addToCartController);
+router.post("/update", controller.updateQtyController);
+router.post("/remove", controller.removeItemController);
 
 export default router;

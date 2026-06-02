@@ -13,6 +13,7 @@ export class UserController extends BaseController {
         super();
         this.userService = new UserServices();
     }
+
     public registerUserController = async (req: Request, res: Response) => {
         try {
             const newUser = getRegisterUserFormattedBody(req.body);
