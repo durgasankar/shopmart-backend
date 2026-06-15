@@ -1,8 +1,9 @@
 import { logger } from "../configs/winston-logger";
 import Product, { ProductAttributes } from "../models/Product";
 import { formatDateTime } from "../utils/date-time-formatter";
+import { IProductService } from "./interfaces/IProductService";
 
-export class ProductService {
+export class ProductService implements IProductService {
 
     private getProductUniqueIdentifier(product: Product): string {
         const { id, category } = product.toJSON();

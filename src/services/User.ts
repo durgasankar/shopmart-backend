@@ -3,7 +3,8 @@ import User, { UserAttributes } from "../models/User";
 import { RegistrationUserResponse } from '../dtos/registration-user';
 import { LoginUserResponse } from '../dtos/login-user';
 import { generateToken } from '../configs/jwt';
-export class UserServices {
+import { IUserService } from './interfaces/IUserService';
+export class UserServices implements IUserService {
     HASH_SALT_ROUND: number = 10;
 
     private getUserEmailByMobileNumber = async (mobileNumber: string): Promise<string | null> => {

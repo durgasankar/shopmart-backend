@@ -3,9 +3,10 @@ import { BaseController } from "./base-controller";
 import { ProductService } from "../services/Product";
 import { logger } from "../configs/winston-logger";
 import { getAddProductFormattedBody } from "../utils/request-formatter";
+import { IProductService } from "../services/interfaces/IProductService";
 
 export class ProductControlller extends BaseController {
-    private productService: ProductService;
+    private productService: IProductService;
 
     constructor() {
         super();

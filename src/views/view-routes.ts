@@ -19,7 +19,7 @@ router.get('/login', (req: Request, res: Response) => {
 
 router.post('/register', async (req: Request, res: Response) => {
     try {
-        const response = await axios.post('http://localhost:5000/api/user/register', req.body);
+        const response = await axios.post('http://localhost:3000/api/user/register', req.body);
         res.render('result', { data: response.data });
     } catch (error: any) {
         res.render('result', { data: error.response?.data || error.message });
@@ -28,7 +28,7 @@ router.post('/register', async (req: Request, res: Response) => {
 
 router.post('/login', async (req: Request, res: Response) => {
     try {
-        const response = await axios.post('http://localhost:5000/api/user/login', {
+        const response = await axios.post('http://localhost:3000/api/user/login', {
             email: req.body.email,
             password: req.body.password
         });
@@ -58,13 +58,13 @@ router.get('/dashboard', async (req: Request, res: Response) => {
         const user = (req.session as any).user;
         if (!user) return res.redirect('/login');
         // Fetch products
-        const productResponse = await axios.get('http://localhost:5000/api/product/all', {
+        const productResponse = await axios.get('http://localhost:3000/api/product/all', {
             headers: { Authorization: `Bearer ${user.token}` }
         });
         // Fetch cart
         let cart = { items: [], totalAmount: 0 };
         try {
-            const cartResponse = await axios.get('http://localhost:5000/api/cart/all', {
+            const cartResponse = await axios.get('http://localhost:3000/api/cart/all', {
                 headers: { Authorization: `Bearer ${user.token}` }
             });
             cart = cartResponse.data.data || { items: [], totalAmount: 0 };
@@ -102,7 +102,7 @@ router.post(
                 });
             }
             const response = await axios.post(
-                'http://localhost:5000/api/product/add',
+                'http://localhost:3000/api/product/add',
                 formData,
                 {
                     headers: {
@@ -127,7 +127,7 @@ router.post('/add-to-cart', async (req: Request, res: Response) => {
         if (!user) return res.redirect('/login');
         
         await axios.post(
-            'http://localhost:5000/api/cart/add',
+            'http://localhost:3000/api/cart/add',
             {
                 productId: Number(req.body.productId)
             },
@@ -148,7 +148,7 @@ router.post('/cart-update', async (req: Request, res: Response) => {
     try {
         const user = (req.session as any).user;
         await axios.post(
-            'http://localhost:5000/api/cart/update',
+            'http://localhost:3000/api/cart/update',
             {
                 productId: req.body.productId,
                 action: req.body.action
@@ -169,7 +169,7 @@ router.post('/cart-remove', async (req: Request, res: Response) => {
     try {
         const user = (req.session as any).user;
         await axios.post(
-            'http://localhost:5000/api/cart/remove',
+            'http://localhost:3000/api/cart/remove',
             {
                 productId: req.body.productId
             },

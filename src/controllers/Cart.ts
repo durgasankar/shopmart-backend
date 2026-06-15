@@ -3,9 +3,10 @@ import { CartService } from "../services/Cart";
 import { getIo } from "../configs/socket";
 import { BaseController } from "./base-controller";
 import { logger } from "../configs/winston-logger";
+import { ICartService } from "../services/interfaces/ICartService";
 
 export class CartController extends BaseController {
-    private cartService: CartService;
+    private cartService: ICartService;
 
     constructor() {
         super();

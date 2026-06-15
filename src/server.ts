@@ -8,7 +8,7 @@ import { initSocket } from './configs/socket';
 
 // loading env configs
 dotenv.config();
-const PORT: number = Number(process.env.PORT) || 5000;
+const PORT: number = Number(process.env.PORT) || 3000;
 
 const startServer = async (): Promise<void> => {
     try {

@@ -5,9 +5,10 @@ import { BaseController } from "./base-controller";
 import { RegistrationUserResponse } from "../dtos/registration-user";
 import { LoginUserResponse } from "../dtos/login-user";
 import { getRegisterUserFormattedBody } from "../utils/request-formatter";
+import { IUserService } from "../services/interfaces/IUserService";
 
 export class UserController extends BaseController {
-    private userService: UserServices;
+    private userService: IUserService;
 
     constructor() {
         super();

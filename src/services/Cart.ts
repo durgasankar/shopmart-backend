@@ -1,8 +1,9 @@
 import { logger } from "../configs/winston-logger";
 import Cart from "../models/Cart";
 import Product from "../models/Product";
+import { ICartService } from "./interfaces/ICartService";
 
-export class CartService {
+export class CartService implements ICartService {
 
     private calculateTotal(items: any[]): number {
         return items.reduce((total, item) => {
@@ -17,7 +18,6 @@ export class CartService {
         if (newQuantity > availableQuantity) return false;
         return true;
     }
-
 
     public async getUserCart(userId: string) {
         let cart = await Cart.findOne({ userId });
